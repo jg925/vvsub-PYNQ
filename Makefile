@@ -1,4 +1,4 @@
-DEVICE := xilinx_u250_xdma_201830_2
+DEVICE := xilinx_u280_xdma_201920_1
 TARGET := hw
 FREQUENCY := 300
 VPP := v++
@@ -16,7 +16,7 @@ XO_DIR := ./_xo.$(TARGET).$(XSA)
 XCLBIN_DIR := ./_xclbin.$(TARGET).$(XSA)
 MOD_SRC_DIR := .src
 SRC_DIR := src
-INSTALL_PATH := ../build
+INSTALL_PATH := build
 
 # Kernel compiler global settings
 CLFLAGS += -t $(TARGET) --platform $(DEVICE)
@@ -29,6 +29,7 @@ endif
 VSUB_XO += $(XO_DIR)/vsub.xo
 
 #INSTALL_TARGETS += $(INSTALL_PATH)/3-advanced-features/advanced.xclbin
+INSTALL_TARGETS += $(INSTALL_PATH)/overlays/vsub.xclbin
 
 all: build install
 
@@ -82,9 +83,10 @@ $(XO_DIR):
 #$(XO_DIR)/mmult.xo: $(SRC_DIR)/advanced_features.cpp | $(XO_DIR)
 #	$(VPP) $(CLFLAGS) --temp_dir $(XO_DIR) -c -k mmult -o'$@' '$<'
 $(XO_DIR)/vsub.xo: $(SRC_DIR/vsub.cpp | $(XO_DIR)
-	$(VPP) $(CLFLAGS) --temp_dir $(XO_DIR) -c -k vsub -o'$@' '$<'
+	$(VPP) $(CLFLAGS) --temp_dir $(XO_DIR) -c -k vsub -o'$@' ./src/vsub.cpp
 
-advanced.$(TARGET).$(XSA).xclbin: $(ADVANCED_XO) | $(XCLBIN_DIR)
+#advanced.$(TARGET).$(XSA).xclbin: $(ADVANCED_XO) | $(XCLBIN_DIR)
+vsub.$(TARGET).$(XSA).xclbin: $(VSUB_XO) | $(XCLBIN_DIR)
 	$(VPP) $(CLFLAGS) --temp_dir $(XCLBIN_DIR) --kernel_frequency $(FREQUENCY) -l -o'$@' $(+)
 
 clean:
