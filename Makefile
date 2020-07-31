@@ -12,11 +12,11 @@ RMDIR = rm -rf
 device2xsa = $(strip $(patsubst %.xpfm, % , $(shell basename $(DEVICE))))
 XSA := $(call device2xsa, $(DEVICE))
 
-XO_DIR := ./_xo.$(TARGET).$(XSA)
-XCLBIN_DIR := ./_xclbin.$(TARGET).$(XSA)
+XO_DIR := ./make/_xo.$(TARGET).$(XSA)
+XCLBIN_DIR := ./make/_xclbin.$(TARGET).$(XSA)
 MOD_SRC_DIR := .src
 SRC_DIR := src
-INSTALL_PATH := build
+INSTALL_PATH := overlays
 
 # Kernel compiler global settings
 CLFLAGS += -t $(TARGET) --platform $(DEVICE)
@@ -24,19 +24,14 @@ ifneq ($(TARGET), hw)
 	CLFLAGS += -g
 endif
 
-#ADVANCED_XO += $(XO_DIR)/vadd_advanced.xo
-#ADVANCED_XO += $(XO_DIR)/mmult.xo
 VSUB_XO += $(XO_DIR)/vsub.xo
 
-#INSTALL_TARGETS += $(INSTALL_PATH)/3-advanced-features/advanced.xclbin
-INSTALL_TARGETS += $(INSTALL_PATH)/overlays/vsub.xclbin
+INSTALL_TARGETS += $(INSTALL_PATH)/vsub.xclbin
 
 all: build install
 
-#build: advanced 
 build: vsub
 
-#advanced: check-vitis check-xrt advanced.$(TARGET).$(XSA).xclbin
 vsub: check-vitis check-xrt vsub.$(TARGET).$(XSA).xclbin
 
 # install targets assume both xclbin and dst folder exist
@@ -52,20 +47,14 @@ ifndef XILINX_XRT
 	$(error XILINX_XRT variable is not set. Please make sure you have sourced the XRT setup.{csh,sh})
 endif
 
-#$(INSTALL_PATH)/3-advanced-features/advanced.xclbin:
-$(INSTALL_PATH)/overlays:
-#ifneq (,$(wildcard advanced.$(TARGET).$(XSA).xclbin))
+$(INSTALL_PATH)/vsub.xclbin:
 ifneq (,$(wildcard vsub.$(TARGET).$(XSA).xclbin))
-#ifneq (,$(wildcard $(INSTALL_PATH)/3-advanced-features))
-ifneq (,$(wildcard $(INSTALL_PATH)/overlays))
+ifneq (,$(wildcard $(INSTALL_PATH)))
 	$(CP) vsub.$(TARGET).$(XSA).xclbin $@
-#else ifneq (,$(wildcard $(INSTALL_PATH)/3_advanced_features))
-#	$(CP) advanced.$(TARGET).$(XSA).xclbin $(INSTALL_PATH)/3_advanced_features
-else ifneq (,$(wildcard $(INSTALL_PATH)/overlays))
-	$(CP) vsub.$(TARGET).$(XSA).xclbin $(INSTALL_PATH)/overlays
+else ifneq (,$(wildcard $(INSTALL_PATH)))
+	$(CP) vsub.$(TARGET).$(XSA).xclbin $(INSTALL_PATH)
 else
-#	$(warning Could not copy to $(INSTALL_PATH)/3-advanced-features as the folder does not exist)
-	$(warning Could not copy to $(INSTALL_PATH)/overlays as the folder does not exist)
+	$(warning Could not copy to $(INSTALL_PATH) as the folder does not exist)
 endif
 else
 	$(warning Could not find file vsub.$(TARGET).$(XSA).xclbin)
@@ -78,14 +67,9 @@ $(XCLBIN_DIR):
 $(XO_DIR): 
 	mkdir -p $@
 
-#$(XO_DIR)/vadd_advanced.xo: $(SRC_DIR)/advanced_features.cpp | $(XO_DIR)
-#	$(VPP) $(CLFLAGS) --temp_dir $(XO_DIR) -c -k vadd -o'$@' '$<'
-#$(XO_DIR)/mmult.xo: $(SRC_DIR)/advanced_features.cpp | $(XO_DIR)
-#	$(VPP) $(CLFLAGS) --temp_dir $(XO_DIR) -c -k mmult -o'$@' '$<'
 $(XO_DIR)/vsub.xo: $(SRC_DIR/vsub.cpp | $(XO_DIR)
 	$(VPP) $(CLFLAGS) --temp_dir $(XO_DIR) -c -k vsub -o'$@' ./src/vsub.cpp
 
-#advanced.$(TARGET).$(XSA).xclbin: $(ADVANCED_XO) | $(XCLBIN_DIR)
 vsub.$(TARGET).$(XSA).xclbin: $(VSUB_XO) | $(XCLBIN_DIR)
 	$(VPP) $(CLFLAGS) --temp_dir $(XCLBIN_DIR) --kernel_frequency $(FREQUENCY) -l -o'$@' $(+)
 
