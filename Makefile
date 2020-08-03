@@ -12,8 +12,8 @@ RMDIR = rm -rf
 device2xsa = $(strip $(patsubst %.xpfm, % , $(shell basename $(DEVICE))))
 XSA := $(call device2xsa, $(DEVICE))
 
-XO_DIR := ./make/_xo.$(TARGET).$(XSA)
-XCLBIN_DIR := ./make/_xclbin.$(TARGET).$(XSA)
+XO_DIR := ./_xo.$(TARGET).$(XSA)
+XCLBIN_DIR := ./_xclbin.$(TARGET).$(XSA)
 MOD_SRC_DIR := .src
 SRC_DIR := src
 INSTALL_PATH := overlays
